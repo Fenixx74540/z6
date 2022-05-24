@@ -16,29 +16,48 @@
     return;
  }
  
+ if(preg_match("\W", $user)){
+    echo "W login dozwolone są wyłącznie litery i cyfry";
+    echo '<a href = "rejestruj.php"> Spróbuj ponownie </a>';
+    return;
+ }
+ 
  $dbhost="localhost"; $dbuser="u781260265_user_VI_z8_ML"; $dbpassword="zaq1@WSX"; $dbname="u781260265_VI_z8_ML";
  $link = mysqli_connect($dbhost, $dbuser, $dbpassword, $dbname);
- $result = mysqli_query($link, "SELECT * FROM `users` WHERE username = '$user'") or die ("Błąd zapytania do bazy: $dbname"); // wiersza, w którym login=login z formularza
+ $result = mysqli_query($link, "SELECT * FROM `users` WHERE `login` = '$user'") or die ("Błąd zapytania do bazy: $dbname"); // wiersza, w którym login=login z formularza
  $rekord = mysqli_fetch_array($result); // wiersza z BD, struktura zmiennej jak w BD
  if($rekord) 
  {
- mysqli_close($link);
- echo "Jest już użytkownik o takim loginie";
- echo '<a href = "rejestruj.php"> Spróbuj ponownie </a>';
- return;
+    mysqli_close($link);
+    echo "Jest już użytkownik o takim loginie";
+    echo '<a href = "rejestruj.php"> Spróbuj ponownie </a>';
+    return;
  }
  
- $link = mysqli_connect($dbhost, $dbuser, $dbpassword, $dbname);
+ //$link = mysqli_connect($dbhost, $dbuser, $dbpassword, $dbname);
  if(!$link) { echo"Błąd: ". mysqli_connect_errno()." ".mysqli_connect_error(); } // obsługa błędu połączenia z BD
  mysqli_query($link, "SET NAMES 'utf8'"); // ustawienie polskich znaków
  
- $addUser = mysqli_query($link, "INSERT INTO `users` (`username`, `password`) VALUES ('$user', '$pass')");
- $idp = mysqli_insert_id($link);
+ $addUser = mysqli_query($link, "INSERT INTO `users`(`login`, `password`) VALUES ('$user','$pass')");
+ $idu = mysqli_insert_id($link);
  mysqli_close($link);
  
- 
     $message = "Pomyślnie dodano użytkownika";
-    header('Location: index.php');
+    
+    session_start();
+    $_SESSION['loggedin'] = true;
+    $_SESSION['idu'] = $idu;
+    $_SESSION['login'] = $user;
+    
+    $structure = './users/';
+    $structure .= $user;
+    echo $structure;
+
+    if (!mkdir($structure, 0777)) {
+        die('Failed to create directories...');
+    }
+ 
+    header('Location: login.php');
     exit();
  
 ?>
